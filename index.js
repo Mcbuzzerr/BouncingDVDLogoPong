@@ -5,8 +5,6 @@ const DVDLogoImage = document.getElementById('logo-img');
 let velocityX = 3;
 let velocityY = 3;
 
-let pongMode = false;
-
 let positionX = window.innerWidth / 2;
 let positionY = window.innerHeight / 2;
 
@@ -17,6 +15,9 @@ DVDLogo.style.left = positionX + 'px';
 DVDLogo.style.top = positionY + 'px';
 DVDLogoImage.style.setProperty('--hue-rotato', Math.floor(Math.random() * 360) + 'deg');
 
+//Pong Mode vvv
+
+let pongMode = false;
 const p1Paddle = document.getElementById('p1-paddle');
 let p1PaddleY = window.innerHeight / 2;
 p1Paddle.style.top = p1PaddleY + 'px';
@@ -26,6 +27,16 @@ p2Paddle.style.top = p2PaddleY + 'px';
 
 let p1Score = 0;
 let p2Score = 0;
+
+//Pong Mode ^^^
+
+//Breakout Mode vvv
+
+let breakoutMode = false;
+const BRpaddle = document.getElementById('breakout-paddle');
+let BRpaddleX = window.innerWidth / 2;
+
+//Breakout Mode ^^^
 
 let keyState = {
     arrowup: false,
@@ -51,9 +62,18 @@ document.addEventListener('keydown', (event) => {
         keyLog.shift();
     }
     keyLog.push(key);
+    console.log(keyLog.join(''));
+    //Pong Mode vvv
     if (keyLog.join('') === 'arrowuparrowuparrowdownarrowdownarrowleftarrowrightarrowleftarrowrightbaenter') {
         togglePongMode();
     }
+    //Pong Mode ^^^
+
+    //Breakout Mode vvv
+    if (keyLog.join('') === 'arrowuparrowdownarrowleftarrowrightaarrowuparrowdownarrowleftarrowrightbenter') {
+        toggleBreakoutMode();
+    }
+    //Breakout Mode ^^^
 })
 
 document.addEventListener('keyup', (event) => {
@@ -63,6 +83,7 @@ document.addEventListener('keyup', (event) => {
     }
 });
 
+//Pong Mode vvv
 const togglePongMode = () => {
     pongMode = !pongMode;
     document.getElementsByClassName('paddle')[0].classList.toggle('hidden');
@@ -83,13 +104,40 @@ const togglePongMode = () => {
         }
     }
 }
+//Pong Mode ^^^
+
+//Breakout Mode vvv
+
+const toggleBreakoutMode = () => {
+    breakoutMode = !breakoutMode;
+    alert('Breakout Mode Activated')
+    document.getElementById('breakoutUI').classList.toggle('hidden');
+    if (breakoutMode) {
+        positionX = window.innerWidth / 2;
+        positionY = window.innerHeight / 2;
+        velocityX = 0;
+        velocityY = 3;
+        generateBricks();
+    }
+}
+
+const generateBricks = () => {
+    for (let i = 0; i < 70; i++) {
+        let brick = document.createElement('div');
+        brick.classList.add('brick');
+        // brick.style.left = (i * 100) + 'px';
+        document.getElementsByClassName('brickContainer')[0].appendChild(brick);
+    }
+}
+
+//Breakout Mode ^^^
 
 const animate = () => {
     requestAnimationFrame(animate);
     let DVDRect = DVDLogo.getBoundingClientRect();
+    //Pong Mode vvv
     let p1Rect = p1Paddle.getBoundingClientRect();
     let p2Rect = p2Paddle.getBoundingClientRect();
-
     if (pongMode) {
         //left
         if (DVDRect.left < p1Rect.right && DVDRect.right > p1Rect.left && DVDRect.top < p1Rect.bottom && DVDRect.bottom > p1Rect.top) {
@@ -110,16 +158,50 @@ const animate = () => {
             velocityY = Math.sin(bounceAngle) * 15;
         }
     }
+    //Pong Mode ^^^
+
+    //Breakout Mode vvv
+    if (breakoutMode) {
+        let BRpaddleRect = BRpaddle.getBoundingClientRect();
+
+        if (DVDRect.bottom > BRpaddleRect.top && DVDRect.top < BRpaddleRect.bottom && DVDRect.left < BRpaddleRect.right && DVDRect.right > BRpaddleRect.left) {
+            document.getElementById('logo-img').style.setProperty('--hue-rotato', Math.floor(Math.random() * 360) + 'deg');
+            let relativeIntersectX = (DVDRect.x) - (BRpaddleRect.x + (BRpaddleRect.width / 2));
+            console.log(DVDRect.x + (DVDRect.width / 2), BRpaddleRect.x + (BRpaddleRect.width / 2))
+            console.log(relativeIntersectX);
+            let normalizedRelativeIntersectionX = (relativeIntersectX / (BRpaddleRect.width / 2));
+            console.log(normalizedRelativeIntersectionX)
+            let bounceAngle = normalizedRelativeIntersectionX * (Math.PI / 4);
+            console.log(bounceAngle);
+            velocityX = Math.cos(bounceAngle) * 6;
+            velocityY = Math.sin(bounceAngle) * 6;
+        }
+
+        let bricks = document.getElementsByClassName('brick');
+        for (let i = 0; i < bricks.length; i++) {
+            let brickRect = bricks[i].getBoundingClientRect();
+            if (DVDRect.bottom > brickRect.top && DVDRect.top < brickRect.bottom && DVDRect.left < brickRect.right && DVDRect.right > brickRect.left) {
+                document.getElementById('logo-img').style.setProperty('--hue-rotato', Math.floor(Math.random() * 360) + 'deg');
+                let relativeIntersectX = (DVDRect.x) - (brickRect.x + (brickRect.width / 2));
+                let normalizedRelativeIntersectionX = (relativeIntersectX / (brickRect.width / 2));
+                let bounceAngle = normalizedRelativeIntersectionX * (Math.PI / 4);
+                velocityX = Math.cos(bounceAngle) * 6;
+                velocityY = Math.sin(bounceAngle) * 6;
+                bricks[i].classList.add('brick-slot')
+                bricks[i].classList.remove('brick');
+            }
+        }
+    }
+    //Breakout Mode ^^^
 
     if (positionX + (DVDLogoWidth / 2) >= window.innerWidth || positionX - (DVDLogoWidth / 2) <= 0) {
         velocityX *= -1;
         document.getElementById('logo-img').style.setProperty('--hue-rotato', Math.floor(Math.random() * 360) + 'deg');
+        //Pong Mode vvv
         if (pongMode) {
             if (positionX < window.innerWidth / 2) {
-                // alert('Left Wall')
                 p2Score++;
             } else if (positionX > window.innerWidth / 2) {
-                // alert('Right Wall')
                 p1Score++;
             }
             positionX = window.innerWidth / 2;
@@ -127,13 +209,23 @@ const animate = () => {
             velocityX *= -0.5;
             velocityY *= 0.5;
         }
+        //Pong Mode ^^^
     }
     if (positionY + (DVDLogoHeight / 2) >= window.innerHeight || positionY - (DVDLogoHeight / 2) <= 0) {
         velocityY *= -1;
         document.getElementById('logo-img').style.setProperty('--hue-rotato', Math.floor(Math.random() * 360) + 'deg');
+        //Breakout Mode vvv
+        if (breakoutMode) {
+            if (positionY > window.innerHeight / 2) {
+                positionX = window.innerWidth / 2;
+                positionY = window.innerHeight / 2;
+                velocityX = 0;
+                velocityY = 3;
+            }
+        }
     }
 
-    if (!pongMode) {
+    if (!pongMode && !breakoutMode) {
 
         if (velocityX > 10 || velocityX < -10) {
             velocityX *= 0.99;
@@ -160,6 +252,7 @@ const animate = () => {
         }
     }
 
+    //Pong Mode vvv
     if (pongMode) {
         const PADDLESPEED = 10;
         if (p1Rect.top >= 0) {
@@ -186,6 +279,25 @@ const animate = () => {
             }
         }
     }
+    //Pong Mode ^^^
+
+    //Breakout Mode vvv
+    if (breakoutMode) {
+        const PADDLESPEED = 10;
+        if (BRpaddleX - (BRpaddle.offsetWidth / 2) >= 0) {
+            if (keyState['a']) {
+                BRpaddleX -= PADDLESPEED;
+            }
+        }
+
+        if (BRpaddleX <= window.innerWidth - (BRpaddle.offsetWidth / 2)) {
+            if (keyState['d']) {
+                BRpaddleX += PADDLESPEED;
+            }
+        }
+    }
+
+    //Breakout Mode ^^^W
 
     positionX += velocityX;
     positionY += velocityY;
@@ -193,12 +305,19 @@ const animate = () => {
     DVDLogo.style.left = positionX + 'px';
     DVDLogo.style.top = positionY + 'px';
 
+    //Pong Mode vvv
     if (pongMode) {
         p1Paddle.style.top = p1PaddleY + 'px';
         p2Paddle.style.top = p2PaddleY + 'px';
+        document.getElementById('p1-score').innerHTML = p1Score;
+        document.getElementById('p2-score').innerHTML = p2Score;
     }
-    document.getElementById('p1-score').innerHTML = p1Score;
-    document.getElementById('p2-score').innerHTML = p2Score;
+    //Pong Mode ^^^
+
+    //Breakout Mode vvv
+    if (breakoutMode) {
+        BRpaddle.style.left = BRpaddleX + 'px';
+    }
 }
 
 requestAnimationFrame(animate);

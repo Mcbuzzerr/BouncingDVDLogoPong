@@ -1,6 +1,7 @@
 body {
     background-color: #0c081e;
     overflow: hidden;
+    padding: 0;
 }
 
 #dvd-logo {
@@ -16,6 +17,12 @@ body {
     height: 100%;
     filter: invert(0.6) sepia(80%) saturate(600%) hue-rotate(var(--hue-rotato)) brightness(0.76) contrast(105%);
 }
+
+.hidden {
+    display: none;
+}
+
+/* Pong mode vvv */
 
 .paddle {
     position: absolute;
@@ -34,9 +41,6 @@ body {
     right: 10px;
 }
 
-.hidden {
-    display: none;
-}
 
 #pongUI {
     position: absolute;
@@ -70,4 +74,43 @@ body {
     border-right: dashed 10px #25ef62;
     left: 50%;
     transform: translateX(-5px);
+}
+
+/* Pong Mode ^^^ */
+
+/* Breakout Mode vvv */
+
+#breakout-paddle {
+    --width: 150px;
+    position: absolute;
+    width: var(--width);
+    height: 20px;
+    background-color: #25ef62;
+    bottom: 10px;
+    transform: translateX(-50%);
+}
+
+.brickContainer {
+    --rows: 7;
+    position: absolute;
+    width: 100%;
+    height: calc(60px * var(--rows));
+    left: 0;
+    top: 0;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(var(--rows), 1fr);
+    grid-gap: 5px;
+}
+
+.brick {
+    width: 100px;
+    height: 50px;
+    background-color: #25ef62;
+}
+
+.brick-slot {
+    width: 100px;
+    height: 50px;
+    /* border: #25ef62 dashed 2px;aaa */
 }
